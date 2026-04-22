@@ -33,7 +33,13 @@ const messages: Record<string, (cfg: Record<string, unknown>) => string> = {
 }
 
 export function runSimulation(body: SimulateRequestBody): SimulationResult {
-  const { nodes, edges, nodeConfigs } = body
+  const nodes = Array.isArray(body?.nodes) ? body.nodes : []
+  const edges = Array.isArray(body?.edges) ? body.edges : []
+  const rawCfg = body?.nodeConfigs
+  const nodeConfigs: Record<string, Record<string, unknown>> =
+    rawCfg && typeof rawCfg === 'object' && !Array.isArray(rawCfg)
+      ? (rawCfg as Record<string, Record<string, unknown>>)
+      : {}
 
   const adj: Record<string, string[]> = {}
   const inDegree: Record<string, number> = {}
