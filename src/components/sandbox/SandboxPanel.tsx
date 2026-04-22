@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ChevronUp, ChevronDown, Play, CheckCircle, AlertCircle, Clock, AlertTriangle } from 'lucide-react'
+import { ChevronUp, ChevronDown, Play, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react'
 import { useWorkflowStore } from '../../store/useWorkflowStore'
 import type { NodeType, SimulationResult, SimulationStep, NodeConfig } from '../../types'
 import type { Edge } from '@xyflow/react'
 import type { WorkflowNode } from '../../types'
+import { runSimulation } from '../../api/simulate/runSimulation'
 import clsx from 'clsx'
 
 // ── Colours / badges ─────────────────────────────────────────────────────────
@@ -219,13 +220,12 @@ function StepRow({ step, index }: { step: SimulationStep; index: number }) {
 
 export default function SandboxPanel() {
   const [isOpen, setIsOpen] = useState(false)
-  const [running, setRunning] = useState(false)
   const [result, setResult] = useState<SimulationResult | null>(null)
   const [issues, setIssues] = useState<ValidationIssue[]>([])
 
   const { nodes, edges, nodeConfigs } = useWorkflowStore()
 
-  async function handleRun() {
+  function handleRun() {
     const found = validateGraph(nodes, edges, nodeConfigs)
     const hasErrors = found.some((i) => i.kind === 'error')
     setIssues(found)
@@ -234,26 +234,18 @@ export default function SandboxPanel() {
     if (hasErrors) return
 
     setRunning(true)
-
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        if (attempt > 0) await new Promise((r) => setTimeout(r, 900))
-        const res = await fetch('/simulate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nodes, edges, nodeConfigs }),
-        })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data: SimulationResult = await res.json()
-        setResult(data)
-        setRunning(false)
-        return
-      } catch {
-        if (attempt < 1) continue
-        setResult({ success: false, steps: [], error: 'Simulation failed — please try again' })
-      }
+    try {
+      const result = runSimulation({
+        nodes: nodes.map((n) => ({ id: n.id, data: { nodeType: n.data.nodeType, label: n.data.label } })),
+        edges: edges.map((e) => ({ source: e.source, target: e.target, sourceHandle: e.sourceHandle })),
+        nodeConfigs: nodeConfigs as Record<string, Record<string, unknown>>,
+      })
+      setResult(result)
+    } catch {
+      setResult({ success: false, steps: [], error: 'Simulation failed — please try again' })
+    } finally {
+      setRunning(false)
     }
-    setRunning(false)
   }
 
   const errors = issues.filter((i) => i.kind === 'error')
@@ -294,17 +286,10 @@ export default function SandboxPanel() {
 
         <button
           onClick={handleRun}
-          disabled={running}
-          className={clsx(
-            'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition',
-            running ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-          )}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition bg-indigo-600 text-white hover:bg-indigo-700"
         >
-          {running ? (
-            <><Clock size={13} className="animate-spin" />Running...</>
-          ) : (
-            <><Play size={13} />Run Simulation</>
-          )}
+          <Play size={13} />
+          Run Simulation
         </button>
       </div>
 
