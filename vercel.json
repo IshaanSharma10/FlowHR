@@ -1,0 +1,7 @@
+{
+  "buildCommand": "vite build",
+  "rewrites": [
+    { "source": "/simulate", "destination": "/api/simulate" },
+    { "source": "/automations", "destination": "/api/automations" }
+  ]
+}

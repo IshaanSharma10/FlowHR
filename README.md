@@ -31,6 +31,7 @@ This project was built as a **hands-on demonstration** of modern frontend engine
 | Forms | **react-hook-form** + **Zod** (+ resolvers) | Validated, maintainable config forms per node type. |
 | API mocking | **MSW** (Mock Service Worker) | Realistic `fetch` in development; automations list and simulation endpoint. |
 | Dev reliability | **Vite middleware** | `POST /simulate` is also handled by the dev server so simulation works even if a request bypasses the service worker. |
+| Production API | **Vercel serverless** (`api/*.ts`) | Same simulation + automations data at `/simulate` and `/automations` via rewrites (see below). |
 
 ---
 
@@ -50,11 +51,16 @@ src/
 │   └── useWorkflowStore.ts # Zustand store, history, React Flow change handlers
 ├── api/
 │   ├── mocks/              # MSW handlers (browser)
-│   └── simulate/           # Shared simulation logic (mock + dev server)
+│   ├── automationsCatalog.ts
+│   └── simulate/           # Shared simulation logic (mock + dev server + Vercel)
 └── types/                  # Shared TypeScript types
+
+api/                        # Vercel serverless routes (production)
+├── simulate.ts             # POST /api/simulate → rewritten from /simulate
+└── automations.ts          # GET /api/automations → rewritten from /automations
 ```
 
-Simulation logic lives in **`src/api/simulate/runSimulation.ts`** so both **MSW** and the **Vite dev plugin** stay in sync—one implementation, two ways to invoke it during development.
+Simulation logic lives in **`src/api/simulate/runSimulation.ts`** so **MSW**, the **Vite dev middleware**, and **Vercel** all use the same code paths where possible.
 
 ---
 
@@ -85,9 +91,22 @@ Open the URL printed in the terminal (usually **http://localhost:5173/**).
 1. The **Sandbox** panel runs **client-side validation** on the current graph.
 2. On success, it sends a **JSON payload** (`nodes`, `edges`, `nodeConfigs`) to **`/simulate`**.
 3. The server response is a ordered list of **simulation steps** (labels, messages, timestamps).
-4. In development, the handler uses a **topological ordering** of the graph so steps reflect a plausible execution order; messages incorporate values from each node’s configuration (e.g. assignee, approver, thresholds).
+4. The handler uses a **topological ordering** of the graph so steps reflect a plausible execution order; messages incorporate values from each node’s configuration (e.g. assignee, approver, thresholds).
 
 This keeps the demo **self-contained** while mirroring how a real orchestration service might consume the same shape of data.
+
+---
+
+## Hosting on Vercel (recommended)
+
+The repo includes **`vercel.json`** and **`api/simulate.ts`** / **`api/automations.ts`** so production can answer the same **`/simulate`** and **`/automations`** URLs the app uses in development (via rewrites to `/api/*`).
+
+1. Push the project to **GitHub** (or GitLab / Bitbucket).
+2. Go to [vercel.com](https://vercel.com), sign in, and **Import** that repository.
+3. Leave defaults: **Framework Preset: Vite**, **Build Command** uses `vite build` from `vercel.json` (so deploy works even if local `tsc -b` is not clean yet), **Output**: `dist`.
+4. Deploy. Open the live URL and run **Run Simulation** to confirm.
+
+**Other hosts (Netlify, Cloudflare Pages, static S3):** you can deploy only the **`vite build`** static output, but you would need separate **serverless functions** or a small backend for **`/simulate`** and **`/automations`**, or those features will not work offline from Vercel’s bundled API.
 
 ---
 
