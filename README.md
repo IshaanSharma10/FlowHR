@@ -91,16 +91,3 @@ This keeps the demo **self-contained** while mirroring how a real orchestration 
 
 ---
 
-## Possible extensions (if you continue the project)
-
-- Persist workflows to a real backend and add authentication.
-- Stricter HR policy checks (SLAs, mandatory approvals, role rules).
-- Branching simulation (decision outcomes) and parallel path execution.
-- BPMN or JSON Schema export for integration with other tools.
-
----
-
-
-## License
-
-Private / academic use—see `package.json` (`"private": true`).
