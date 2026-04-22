@@ -1,5 +1,5 @@
 {
-  "buildCommand": "vite build",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/simulate", "destination": "/api/simulate" },
     { "source": "/automations", "destination": "/api/automations" }

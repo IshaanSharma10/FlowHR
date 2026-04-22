@@ -1,23 +1,8 @@
 import type { Node } from '@xyflow/react'
+import type { NodeType } from './simulation'
 
-export type NodeType =
-  | 'start' | 'task' | 'approval' | 'autostep' | 'end'
-  | 'decision' | 'fork' | 'join'
-  | 'notification' | 'delay' | 'subworkflow' | 'datatransform'
-
-export interface AutomationParam {
-  name: string
-  type: 'string' | 'number' | 'boolean' | 'select'
-  label: string
-  required: boolean
-  options?: string[]
-}
-
-export interface AutomationAction {
-  id: string
-  name: string
-  params: AutomationParam[]
-}
+export type { NodeType, SimulationStep, SimulationResult } from './simulation'
+export type { AutomationParam, AutomationAction } from './automation'
 
 // ── Existing configs ──────────────────────────────────────────────────────────
 
@@ -112,18 +97,3 @@ export interface NodeData extends Record<string, unknown> {
 }
 
 export type WorkflowNode = Node<NodeData>
-
-export interface SimulationStep {
-  nodeId: string
-  nodeType: NodeType
-  label: string
-  status: 'success' | 'pending' | 'skipped'
-  message: string
-  timestamp: string
-}
-
-export interface SimulationResult {
-  success: boolean
-  steps: SimulationStep[]
-  error?: string
-}

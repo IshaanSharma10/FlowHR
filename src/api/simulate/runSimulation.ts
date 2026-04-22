@@ -1,4 +1,4 @@
-import type { NodeType, SimulationResult } from '../../types'
+import type { NodeType, SimulationResult } from '../../types/simulation'
 
 export interface SimulateRequestBody {
   nodes: Array<{ id: string; data: { nodeType: string; label: string } }>

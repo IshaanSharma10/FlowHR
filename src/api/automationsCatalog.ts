@@ -1,4 +1,4 @@
-import type { AutomationAction } from '../types'
+import type { AutomationAction } from '../types/automation'
 
 export const automationsCatalog: AutomationAction[] = [
   {
