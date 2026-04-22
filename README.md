@@ -100,11 +100,6 @@ This keeps the demo **self-contained** while mirroring how a real orchestration 
 
 ---
 
-## Academic / placement note
-
-This repository is suitable for **portfolio or assignment submission**: it combines **product thinking** (HR workflow domain), **UX** (canvas + inspector + feedback), and **engineering discipline** (TypeScript, modular structure, testing-friendly simulation core). If you reuse it, add your own **screenshots or a short demo recording** to the top of this README so reviewers can grasp the UI in seconds.
-
----
 
 ## License
 
