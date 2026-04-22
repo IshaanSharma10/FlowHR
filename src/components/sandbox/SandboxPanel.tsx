@@ -220,6 +220,7 @@ function StepRow({ step, index }: { step: SimulationStep; index: number }) {
 
 export default function SandboxPanel() {
   const [isOpen, setIsOpen] = useState(false)
+  const [running, setRunning] = useState(false)
   const [result, setResult] = useState<SimulationResult | null>(null)
   const [issues, setIssues] = useState<ValidationIssue[]>([])
 
@@ -286,10 +287,11 @@ export default function SandboxPanel() {
 
         <button
           onClick={handleRun}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition bg-indigo-600 text-white hover:bg-indigo-700"
+          disabled={running}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Play size={13} />
-          Run Simulation
+          {running ? 'Running…' : 'Run Simulation'}
         </button>
       </div>
 
